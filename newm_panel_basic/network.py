@@ -156,9 +156,111 @@ class NetworkLauncher:
                 y += 1
         self.scr.refresh()
 
+    def get_devices(self) -> List[Dict[str, Any]]:
+        """Get network devices using NM client"""
+        devices = []
+        if not self.client:
+            return devices
+
+        type_map = {
+            NM.DeviceType.ETHERNET: "ethernet",
+            NM.DeviceType.WIFI: "wifi",
+            NM.DeviceType.LOOPBACK: "loopback",
+            NM.DeviceType.BRIDGE: "bridge",
+            NM.DeviceType.BOND: "bond",
+            NM.DeviceType.TEAM: "team",
+        }
+
+        state_map = {
+            NM.DeviceState.ACTIVATED: "activated",
+            NM.DeviceState.DISCONNECTED: "disconnected",
+            NM.DeviceState.UNAVAILABLE: "unavailable",
+            NM.DeviceState.PREPARE: "prepare",
+            NM.DeviceState.CONFIG: "config",
+            NM.DeviceState.NEED_AUTH: "need_auth",
+            NM.DeviceState.IP_CONFIG: "ip_config",
+            NM.DeviceState.SECONDARIES: "secondaries",
+            NM.DeviceState.DEACTIVATING: "deactivating",
+            NM.DeviceState.FAILED: "failed",
+        }
+        try:
+            for device in self.client.get_devices():
+                devices.append({
+                    'name': device.get_iface(),
+                    'type': type_map.get(device.get_device_type(), "unknown"),
+                    'state': state_map.get(device.get_state(), "unknown"),
+                    'device': device
+                })
+        except Exception as e:
+            logger.error(f"Failed to get devices: {e}")
+        return devices
+
+
+    def scan_networks(self) -> List[Dict[str, Any]]:
+        """Scan for WiFi networks using NM client"""
+        networks = []
+        if not self.client:
+            return networks
+        try:
+            wifi_devices = [dev for dev in self.client.get_devices() if
+                            dev.get_device_type() == NM.DeviceType.WIFI]
+            if not wifi_devices:
+                return networks
+
+            wifi_device = wifi_devices[0]
+
+            try: 
+                wifi_device.request_scan_async(None, None, None)
+                # add delay for aync
+                time.sleep(1)
+            except Exception as e:
+                logger.warning(f"Scan request failed: {e}")
+
+            # get access points
+            access_points = wifi_device.get_access_points()
+            seen_ssids = set()
+
+            for ap in access_points:
+                ssid_bytes = ap.get_ssid()
+                if not ssid_bytes:
+                    continue
+
+                try:
+                    ssid = ssid_bytes.get_data().decode('utf-8')
+                except:
+                    continue
+
+                if ssid in seen_ssids or not ssid.strip():
+                    continue
+
+                seen_ssids.add(ssid)
+
+                # check security
+                flags = ap.get_flags()
+                wpa_flags = ap.get_wpa_flags()
+                rsn_flags = ap.get_rsn_flags()
+
+                secured = bool(flags & NM.AccessPointFlags.PRIVACY or 
+                               wpa_flags != NM.AccessPointFlags.NONE or 
+                               rsn_flags != NM.AccessPointFlags.NONE)
+
+                networks.append({
+                    'ssid': ssid,
+                    'strength': ap.get_strength(),
+                    'secured': secured,
+                    'ap': ap
+                })
+
+            # sort by signal strength
+            networks.sort(key=lambda x: x['strength'], reverse=True)
+
+        except Exception as e:
+            logger.error(f"Failed to scan networks: {e}")
+        return networks
+
     # TODO:
-    # [ ] create device list functionality
-    # [ ] create scanning functionality
+    # [*] create device list functionality
+    # [*] create scanning functionality
     # [ ] connection status functionality
     # [ ] connection to network functionality
     # [ ] maybe disconnection from all network functionality
