@@ -500,7 +500,7 @@ class NetworkLauncher:
     def enter_password(self) -> None:
         while True:
             self.render()
-            ch = self.ch.getch()
+            ch = self.scr.getch()
 
             if ch == curses.ERR or ch == 410:
                 continue
