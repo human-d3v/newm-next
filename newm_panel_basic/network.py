@@ -98,16 +98,18 @@ class NetworkLauncher:
                 .renderText("newm-next"),
                 Figlet(font="digital", justify="center", width=width)
                 .renderText("Networks"),
-                "    [ESC[ Back   [ENTER] Connect"
+                "    [ESC] Back   [ENTER] Connect",
+                "",
+                "     |SECURITY| |NAME| |STRENGTH|"
             ]
             if self.pending:
                 texts.append("      Scanning...")
             elif self.networks:
                 for i, network in enumerate(self.networks):
                     prefix = "    + " if i == self.selected_idx else "      "
-                    security = "SECURED" if network.get("secured") \
+                    security = "󱚿" if network.get("secured") \
                         else "       "
-                    signal = " " * (network.get('strength', 0) // 25)
+                    signal = "*" * (network.get('strength', 0) // 25)
                     texts.append(
                         f"{prefix} {security}  {network['ssid']} {signal}"
                     )
@@ -554,10 +556,5 @@ if __name__ == "__main__":
     main()
 
     # TODO:
-    # [*] create device list functionality
-    # [*] create scanning functionality
-    # [*] connection status functionality
-    # [*] connection to network functionality
-    # [*] maybe disconnection from all network functionality
-    # [*] routing functionality
-    # [*] password input for wifi functionality
+    # [ ] incorporate a enable flag on the config file
+    # [ ] add network to panel launcher capability
