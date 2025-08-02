@@ -237,9 +237,7 @@ class NetworkLauncher:
                 wpa_flags = ap.get_wpa_flags()
                 rsn_flags = ap.get_rsn_flags()
 
-                secured = bool(flags & NM.AccessPointFlags.PRIVACY or
-                               wpa_flags != NM.AccessPointFlags.NONE or
-                               rsn_flags != NM.AccessPointFlags.NONE)
+                secured = bool(flags or wpa_flags or rsn_flags)
 
                 networks.append({
                     'ssid': ssid,
@@ -349,11 +347,13 @@ class NetworkLauncher:
                 connection.add_setting(s_wifi_sec)
 
             # add and activate connection asychronously
-            self.client.add_and_activate_connection(
+            self.client.add_and_activate_connection_async(
                 connection,
                 wifi_device,
                 target_ap.get_path(),
-                None
+                None,  # cancellable
+                None,  # callback
+                None   # user_data
             )
 
             # wait for connection to establish
