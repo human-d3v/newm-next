@@ -3,8 +3,10 @@ import logging
 
 from .lock import lock
 from .launcher import launcher
+from .network import network
 
 logger = logging.getLogger(__name__)
+
 
 def panel(p: str) -> None:
     path = os.environ['HOME'] if 'HOME' in os.environ else '/'
@@ -32,5 +34,7 @@ def panel(p: str) -> None:
         lock()
     elif p == "launcher":
         launcher()
+    elif p == "network":
+        network()
     else:
         raise Exception("Unknown panel %s" % p)

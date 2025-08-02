@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 all_panels: list[str] = [
     "lock",
     "launcher",
+    "network",
     "top_bar",
     "bottom_bar",
     "bar"

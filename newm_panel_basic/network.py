@@ -533,7 +533,7 @@ class NetworkLauncher:
                 self.connection_status_router()
 
 
-def network_manager() -> None:
+def network() -> None:
     """Main entry point"""
     nm = NetworkLauncher()
     try:
@@ -545,7 +545,7 @@ def network_manager() -> None:
 def main() -> None:
     while True:
         try:
-            network_manager()
+            network()
             break
         except KeyboardInterrupt:
             break
