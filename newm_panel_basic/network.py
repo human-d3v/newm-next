@@ -457,33 +457,36 @@ class NetworkLauncher:
                 self.selected_idx = (self.selected_idx + 1) % len(self.networks)
             elif ch == 10 and self.networks:  # enter
                 selected_network = self.networks[self.selected_idx]
-                self.state = "password_input"
-                self.message = f"Password for {selected_network['ssid']}:"
-                self.password = ""
-                self.enter_password()
+                if selected_network.secured:
+                    self.state = "password_input"
+                    self.message = f"Password for {selected_network['ssid']}:"
+                    self.password = ""
+                    self.enter_password()
 
-                if self.password:  # user didn't cancel
+                    if self.password:  # user didn't cancel
+                        self.pending = True
+                        self.render()
+                        success = self.connect_to_network(
+                            selected_network['ssid'], self.password
+                        )
+                        self.pending = False
+                        self.message = "Connected!" if success else "Failed to connect"
+                        self.render()
+                        time.sleep(2)
+
+                    self.state = "network_list"
+                    self.password = ""
+                else:
+                    # open network
                     self.pending = True
                     self.render()
-                    success = self.connect_to_network(
-                        selected_network['ssid'], self.password
-                    )
+                    success = self.connect_to_network(selected_network['ssid'])
                     self.pending = False
                     self.message = "Connected!" if success else "Failed to connect"
                     self.render()
                     time.sleep(2)
-
-                self.state = "network_list"
-                self.password = ""
             else:
-                # open network
-                self.pending = True
-                self.render()
-                success = self.connect_to_network(selected_network['ssid'])
-                self.pending = False
-                self.message = "Connected!" if success else "Failed to connect"
-                self.render()
-                time.sleep(2)
+                continue
 
     def connection_status_router(self) -> None:
         while True:
