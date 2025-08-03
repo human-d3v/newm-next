@@ -318,7 +318,9 @@ class Layout(PyWM[View], Animate[PyWMDownstreamState], Animatable):
         load_config(path_str=self._config_file)
 
         self._debug = debug
-        PyWM.__init__(self, View, **conf_pywm(), outputs=conf_outputs(), debug=debug)
+        conf = conf_pywm()
+        conf.pop('debug', None)
+        PyWM.__init__(self, View, **conf, outputs=conf_outputs(), debug=debug)
         Animate.__init__(self)
 
         self.key_processor = KeyProcessor()
