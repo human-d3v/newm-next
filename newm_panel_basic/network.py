@@ -457,7 +457,7 @@ class NetworkLauncher:
                 self.selected_idx = (self.selected_idx + 1) % len(self.networks)
             elif ch == 10 and self.networks:  # enter
                 selected_network = self.networks[self.selected_idx]
-                if selected_network.secured:
+                if selected_network["secured"]:
                     self.state = "password_input"
                     self.message = f"Password for {selected_network['ssid']}:"
                     self.password = ""
