@@ -108,7 +108,7 @@ class NetworkLauncher:
                 for i, network in enumerate(self.networks):
                     prefix = "    + " if i == self.selected_idx else "      "
                     security = "󱚿" if network.get("secured") \
-                        else "       "
+                        else " "
                     signal = "*" * (network.get('strength', 0) // 25)
                     texts.append(
                         f"{prefix} {security}  {network['ssid']} {signal}"
